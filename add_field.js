@@ -4,6 +4,7 @@ const figlet = require('figlet');
 const inquirer = require('inquirer');
 const fs = require('fs');
 const generator = require('generate-password');
+const encryption = require('./encryption');
 
 // Register plugin
 inquirer.registerPrompt("search-list", require('inquirer-search-list'));
@@ -19,6 +20,8 @@ console.log(
 // Load master file
 let master_raw = fs.readFileSync('local_file.master');
 let master_array = JSON.parse(master_raw);
+let decrypted_master_array = JSON.parse(encryption.decrypt(master_array));
+console.log('Decrypted: ' + JSON.stringify(decrypted_master_array));
  
 inquirer
     .prompt([
@@ -26,12 +29,12 @@ inquirer
             type: "search-list",
             message: "Select record to add",
             name: "record_to_add",
-            choices: master_array,
+            choices: decrypted_master_array,
         }
     ])
     .then(function(record) {
         // Find the record to add the field to
-        let record_to_add = master_array.find(o => o.name === record.record_to_add);
+        let record_to_add_field_to = decrypted_master_array.find(o => o.name === record.record_to_add);
 
         // Ask for new field
         inquirer
@@ -63,16 +66,20 @@ inquirer
                 }
             ])
             .then(function (field) {
+                // Add field to record
+                record_to_add_field_to[field.name] = field.content;
+
                 // Update master array
-                record_to_add[field.name] = field.content;
-                master_array[field.name] = record_to_add;
+                decrypted_master_array[field.name] = record_to_add_field_to;
 
-                // Write to master file
-                fs.writeFile('local_file.master', JSON.stringify(master_array, null, "\t"), function (err) {
-                if (err) throw err;
+                // Encrypt
+                let encrypted_master_array = encryption.encrypt(JSON.stringify(decrypted_master_array));
+                console.log('Encrypted array: ' + encrypted_master_array);
+
+                // Write to file
+                fs.writeFile('local_file.master', JSON.stringify(encrypted_master_array, null, "\t"), function (err) {
+                  if (err) throw err;
                 });
-
-                console.log('New field "' + field.name + '" added to record "' + record_to_add.name + '" with content "' + field.content + '"');
             })
             
     })

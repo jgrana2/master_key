@@ -4,6 +4,9 @@ const figlet = require('figlet');
 const inquirer = require('inquirer');
 const fs = require('fs');
 const generator = require('generate-password');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+const encryption = require('./encryption');
 
 clear();
 
@@ -50,7 +53,7 @@ inquirer
           let record_name = record.name;
           
           // Search for existing records with the same name
-          if (master_array.find(o => o.name === record_name) === undefined){
+          if (decrypted_master_array.find(o => o.name === record_name) === undefined){
               inquirer
                 .prompt([
                           {
@@ -82,11 +85,18 @@ inquirer
                         }
                 ])
                 .then((record) => {
-                    // Write to master 
-                    record['name'] = record_name;
-                    master_array.push(record);
-                    fs.writeFile('local_file.master', JSON.stringify(master_array, null, "\t"), function (err) {
-                        if (err) throw err;
+                    // Add new record to master array
+                    let final_record = {'name': record_name, ...record};
+                    console.log('Add record: ' + JSON.stringify(final_record));
+                    decrypted_master_array.push(final_record);
+
+                    // Encrypt
+                    let encrypted_master_array = encryption.encrypt(JSON.stringify(decrypted_master_array));
+                    console.log('Encrypted array: ' + encrypted_master_array);
+
+                    // Write to file
+                    fs.writeFile('local_file.master', JSON.stringify(encrypted_master_array, null, "\t"), function (err) {
+                      if (err) throw err;
                     });
                 })
           } else {

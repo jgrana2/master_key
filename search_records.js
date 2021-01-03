@@ -5,6 +5,7 @@ const inquirer = require('inquirer');
 const fs = require('fs');
 const generator = require('generate-password');
 const ncp = require('copy-paste');
+const encryption = require('./encryption');
 
 // Register plugin
 inquirer.registerPrompt("search-list", require('inquirer-search-list'));
@@ -17,9 +18,12 @@ console.log(
   )
 );
 
+
 // Load master file
 let master_raw = fs.readFileSync('local_file.master');
 let master_array = JSON.parse(master_raw);
+let decrypted_master_array = JSON.parse(encryption.decrypt(master_array));
+console.log('Decrypted: ' + JSON.stringify(decrypted_master_array));
 
 inquirer
     .prompt([
@@ -27,11 +31,11 @@ inquirer
             type: "search-list",
             message: "Select record to add",
             name: "record_to_add",
-            choices: master_array,
+            choices: decrypted_master_array,
         }
     ])
     .then(function(record) {
-        let found_record = master_array.find(o => o.name === record.record_to_add);
+        let found_record = decrypted_master_array.find(o => o.name === record.record_to_add);
 
         inquirer
         .prompt([
