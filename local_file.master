@@ -1,1 +1,18 @@
-[]
+[
+	{
+		"username": "jose.grana2.v",
+		"password": "5I2XVugGvk",
+		"name": "Facebook"
+	},
+	{
+		"username": "jd.grana2.co",
+		"password": "JieqgfhOJD",
+		"name": "Instagram"
+	},
+	{
+		"username": "josedgv@gmail.com",
+		"password": "rqIRxXPXws",
+		"name": "Jose Gmail",
+		"Passphrase": "JQq0biwqqx"
+	}
+]
