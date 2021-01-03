@@ -4,8 +4,6 @@ const figlet = require('figlet');
 const inquirer = require('inquirer');
 const fs = require('fs');
 const generator = require('generate-password');
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
 const encryption = require('./encryption');
 
 clear();

@@ -3,7 +3,6 @@ const chalk = require('chalk');
 const figlet = require('figlet');
 const inquirer = require('inquirer');
 const fs = require('fs');
-const generator = require('generate-password');
 const ncp = require('copy-paste');
 const encryption = require('./encryption');
 
