@@ -14,9 +14,23 @@ console.log(
 );
 
 // Load master file
-let master_raw = fs.readFileSync('local_file.master');
-let master_array = JSON.parse(master_raw);
+var decrypted_master_array = [];
+const file = 'local_file.master';
 
+// Test the if the file exists 
+console.log('\n> Checking if the file exists...'); 
+try { 
+  fs.accessSync(file, fs.constants.F_OK); 
+  console.log('File does exist'); 
+  let master_array = JSON.parse(fs.readFileSync('local_file.master'));
+    decrypted_master_array = JSON.parse(encryption.decrypt(master_array));
+    console.log('Decrypted: ' + JSON.stringify(decrypted_master_array));
+} catch (err) { 
+  console.error('File does not exist'); 
+  decrypted_master_array = [];
+} 
+
+// Ask for new record name
 inquirer
   .prompt([
       {
