@@ -5,6 +5,7 @@ const inquirer = require('inquirer');
 const fs = require('fs');
 const ncp = require('copy-paste');
 const encryption = require('./encryption');
+const pbkdf2 = require('pbkdf2');
 
 // Register plugin
 inquirer.registerPrompt("search-list", require('inquirer-search-list'));
@@ -12,46 +13,77 @@ inquirer.registerPrompt("search-list", require('inquirer-search-list'));
 clear();
 
 console.log(
-  chalk.yellow(
-    figlet.textSync('Master Key', { horizontalLayout: 'full' })
-  )
+    chalk.yellow(
+        figlet.textSync('Master Key', { horizontalLayout: 'full' })
+    )
 );
-
-
-// Load master file
-let master_raw = fs.readFileSync('local_file.master');
-let master_array = JSON.parse(master_raw);
-let decrypted_master_array = JSON.parse(encryption.decrypt(master_array));
-console.log('Decrypted: ' + JSON.stringify(decrypted_master_array));
 
 inquirer
     .prompt([
         {
-            type: "search-list",
-            message: "Select record to add",
-            name: "record_to_add",
-            choices: decrypted_master_array,
+            name: 'password',
+            type: 'password',
+            message: 'Please enter Master Password:'
         }
     ])
-    .then(function(record) {
-        let found_record = decrypted_master_array.find(o => o.name === record.record_to_add);
+    .then((master) => {
+        const key = pbkdf2.pbkdf2Sync(master.password, 'salt', 1, 32, 'sha512');
+        start(key);
+    });
 
-        inquirer
+function start(key) {
+
+    var decrypted_master_array = [];
+    const file = 'local_file.master';
+
+    // Check if the master file exists
+    try {
+        fs.accessSync(file, fs.constants.F_OK);
+        let master_array = JSON.parse(fs.readFileSync('local_file.master'));
+        decrypted_master_array = JSON.parse(encryption.decrypt(master_array, key));
+        console.log('Master file decrypted');
+    } catch (err) {
+        // Catch wrong password
+        if (err.message === 'error:06065064:digital envelope routines:EVP_DecryptFinal_ex:bad decrypt') {
+            console.log('Wrong password');
+            return false;
+        } else {
+            console.log(err.message);
+            // Catch file doesn't exists
+            console.error('File does not exist');
+            decrypted_master_array = [];
+        }
+    }
+
+    inquirer
         .prompt([
             {
-                type: "list",
-                message: "Select the field to copy to clipboard",
-                name: "name",
-                choices: Object.keys(found_record),
+                type: "search-list",
+                message: "Select record to show",
+                name: "record_to_add",
+                choices: decrypted_master_array,
             }
         ])
-        .then(function(selected_field) {
-            ncp.copy(found_record[selected_field.name], function () {
-              console.log('Contents of field "' + selected_field.name + '" copied to clipboard');
-            });
-            
-            
+        .then(function (record) {
+            let found_record = decrypted_master_array.find(o => o.name === record.record_to_add);
+
+            inquirer
+                .prompt([
+                    {
+                        type: "list",
+                        message: "Select the field to copy to clipboard",
+                        name: "name",
+                        choices: Object.keys(found_record),
+                    }
+                ])
+                .then(function (selected_field) {
+                    ncp.copy(found_record[selected_field.name], function () {
+                        console.log('Contents of field "' + selected_field.name + '" copied to clipboard');
+                    });
+
+
+                })
+                .catch(e => console.log(e));
         })
         .catch(e => console.log(e));
-    })
-    .catch(e => console.log(e));
+}
