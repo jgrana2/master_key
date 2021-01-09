@@ -2,7 +2,7 @@
 
 ![alt text](https://github.com/jgrana2/master_key/blob/master/screenshot.png?raw=true)
 
-This master key script is a Node.js app to store encrypted passwords on a local master file securely. This app is designed to be run locally, with no cloud server yet. However, since the master file is encrypted, you can safely store it in any cloud service or push it to a private GitHub repo to keep track of changes.
+This master key script is a Node.js app to store encrypted passwords on a local master file securely. This app is designed to be run locally, with no cloud server yet. However, since the master file is encrypted, you can safely store it in any cloud service or push it to a private GitHub repo to keep track of changes (assuming a strong master password is used).
 
 ## USAGE
 
