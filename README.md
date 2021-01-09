@@ -8,6 +8,7 @@ This master key script is a Node.js app to store encrypted passwords on a local 
 
 ```console
 git clone https://github.com/jgrana2/master_key.git
+cd master_key/
 npm install
 ```
 
