@@ -34,12 +34,12 @@ inquirer
 function start(key) {
 
     var decrypted_master_array = [];
-    const file = 'local_file.master';
+    const file = 'local.master_key';
 
     // Check if the master file exists
     try {
         fs.accessSync(file, fs.constants.F_OK);
-        let master_array = JSON.parse(fs.readFileSync('local_file.master'));
+        let master_array = JSON.parse(fs.readFileSync('local.master_key'));
         decrypted_master_array = JSON.parse(encryption.decrypt(master_array, key));
         console.log('Master file decrypted');
     } catch (err) {
@@ -49,8 +49,8 @@ function start(key) {
             return false;
         } else {
             // Catch file doesn't exists
-            console.error('File does not exist');
-            decrypted_master_array = [];
+            console.error('File does not exist. Run node create_record.js to create a new master file.');
+            return false;
         }
     }
 
@@ -97,6 +97,7 @@ function start(key) {
                     }
                 ])
                 .then(function (field) {
+                    clear();
                     // Add field to record
                     record_to_add_field_to[field.name] = field.content;
 
@@ -109,7 +110,7 @@ function start(key) {
                     let encrypted_master_array = encryption.encrypt(JSON.stringify(decrypted_master_array), key);
 
                     // Write to file
-                    fs.writeFile('local_file.master', JSON.stringify(encrypted_master_array, null, "\t"), function (err) {
+                    fs.writeFile('local.master_key', JSON.stringify(encrypted_master_array, null, "\t"), function (err) {
                         if (err) throw err;
                     });
                 })

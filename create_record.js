@@ -31,12 +31,12 @@ inquirer
 function start(key) {
 
   var decrypted_master_array = [];
-  const file = 'local_file.master';
+  const file = 'local.master_key';
 
   // Check if the master file exists
   try {
     fs.accessSync(file, fs.constants.F_OK);
-    let master_array = JSON.parse(fs.readFileSync('local_file.master'));
+    let master_array = JSON.parse(fs.readFileSync('local.master_key'));
     decrypted_master_array = JSON.parse(encryption.decrypt(master_array, key));
     console.log('Master file decrypted');
   } catch (err) {
@@ -46,8 +46,8 @@ function start(key) {
       return false;
     } else {
       // Catch file doesn't exists
-      console.error('File does not exist');
-      decrypted_master_array = [];  
+      console.error('File does not exist. A new local.master_key file will be created.');
+      decrypted_master_array = [];
     }
   }
 
@@ -89,7 +89,7 @@ function start(key) {
             },
             {
               name: 'password',
-              type: 'input',
+              type: 'password',
               message: 'Enter Password:',
               default: generator.generate({ length: 10, numbers: true }),
               validate: function (value) {
@@ -103,6 +103,7 @@ function start(key) {
             }
           ])
           .then((record) => {
+            clear();
             // Add new record to master array
             let final_record = { 'name': record_name, ...record };
             console.log('Record ' + JSON.stringify(final_record.name) + ' added succesfully');
@@ -112,12 +113,12 @@ function start(key) {
             let encrypted_master_array = encryption.encrypt(JSON.stringify(decrypted_master_array), key);
 
             // Write to file
-            fs.writeFile('local_file.master', JSON.stringify(encrypted_master_array, null, "\t"), function (err) {
+            fs.writeFile('local.master_key', JSON.stringify(encrypted_master_array, null, "\t"), function (err) {
               if (err) throw err;
             });
           })
       } else {
-        console.log('There is an existing record with that name, try another one');
+        console.log("There's an existing record with that name, try another one.");
       }
     });
 }

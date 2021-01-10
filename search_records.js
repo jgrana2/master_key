@@ -34,12 +34,12 @@ inquirer
 function start(key) {
 
     var decrypted_master_array = [];
-    const file = 'local_file.master';
+    const file = 'local.master_key';
 
     // Check if the master file exists
     try {
         fs.accessSync(file, fs.constants.F_OK);
-        let master_array = JSON.parse(fs.readFileSync('local_file.master'));
+        let master_array = JSON.parse(fs.readFileSync('local.master_key'));
         decrypted_master_array = JSON.parse(encryption.decrypt(master_array, key));
         console.log('Master file decrypted');
     } catch (err) {
@@ -50,8 +50,8 @@ function start(key) {
         } else {
             console.log(err.message);
             // Catch file doesn't exists
-            console.error('File does not exist');
-            decrypted_master_array = [];
+            console.error('File does not exist, run node create_record.js to create a new master file.');
+            return false;
         }
     }
 
