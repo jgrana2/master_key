@@ -3,7 +3,7 @@ const chalk = require('chalk');
 const figlet = require('figlet');
 const inquirer = require('inquirer');
 const fs = require('fs');
-const ncp = require('copy-paste');
+const clipboardy = require('clipboardy');
 const encryption = require('./encryption');
 const pbkdf2 = require('pbkdf2');
 
@@ -77,11 +77,8 @@ function start(key) {
                     }
                 ])
                 .then(function (selected_field) {
-                    ncp.copy(found_record[selected_field.name], function () {
-                        console.log('Contents of field "' + selected_field.name + '" copied to clipboard');
-                    });
-
-
+                    clipboardy.writeSync(found_record[selected_field.name]);
+                    console.log('Contents of field "' + selected_field.name + '" copied to clipboard');
                 })
                 .catch(e => console.log(e));
         })
